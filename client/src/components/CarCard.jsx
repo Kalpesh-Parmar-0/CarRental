@@ -28,19 +28,19 @@ const CarCard = ({car}) => {
                 </div>
             </div>
             <div className='mt-4 grid grid-cols-2 gap-y-2 text-gray-600'>
-                <div className='flex items-center text-sm text-muted-foregroud'>
+                <div className='flex items-center text-sm text-muted-foreground'>
                     <img src={assets.users_icon} alt="" className='h-4 mr-2'/>
                     <span>{car.seating_capacity} Seats</span>
                 </div>
-                <div className='flex items-center text-sm text-muted-foregroud'>
+                <div className='flex items-center text-sm text-muted-foreground'>
                     <img src={assets.fuel_icon} alt="" className='h-4 mr-2'/>
                     <span>{car.fuel_type}</span>
                 </div>
-                <div className='flex items-center text-sm text-muted-foregroud'>
+                <div className='flex items-center text-sm text-muted-foreground'>
                     <img src={assets.car_icon} alt="" className='h-4 mr-2'/>
                     <span>{car.transmission}</span>
                 </div>
-                <div className='flex items-center text-sm text-muted-foregroud'>
+                <div className='flex items-center text-sm text-muted-foreground'>
                     <img src={assets.location_icon} alt="" className='h-4 mr-2'/>
                     <span>{car.location} Seats</span>
                 </div>
