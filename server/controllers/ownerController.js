@@ -116,7 +116,7 @@ export const getDashbordData = async (req, res) => {
         if(role !== 'owner') {
             return res.json({success:false, message: "Unauthorized"})
         }
-        const cars = await Car.find(_id)
+        const cars = await Car.find({ owner: _id })
         const bookings = await Booking.find({owner: _id}).populate('car').sort({createdAt: -1})
 
         const pendingBookings = await Booking.find({owner: _id, status: "pending"})
