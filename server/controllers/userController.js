@@ -5,8 +5,8 @@ import Car from "../models/Car.js";
 
 // generate JWT Token
 const generateToken = (userId)=>{
-    const payload = userId;
-    return jwt.sign(payload, process.env.JWT_SECRET)
+    // const payload = userId;
+    return jwt.sign({id: userId}, process.env.JWT_SECRET, {expiresIn: "7d"})
 }
 
 // registor user
@@ -25,7 +25,16 @@ export const registerUser = async (req, res)=> {
         const hashedPassword = await bcrypt.hash(password, 10)
         const user = await User.create({name, email, password:hashedPassword})
         const token = generateToken(user._id.toString())
-        res.json({success:true, token})
+        // res.json({success:true, token})
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        })
+
+        res.json({success:true})
 
     } catch (error) {
         console.log(error.message)
@@ -46,7 +55,16 @@ export const loginUser = async(req, res)=>{
             return res.json({success:false, message:"Invalid credentials"})
         }
         const token = generateToken(user._id.toString())
-        res.json({success:true, token})
+        // res.json({success:true, token})
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        })
+        res.json({success:true})
+
     } catch(error){
         console.log(error.message)
         res.json({success:false, message:error.message})
