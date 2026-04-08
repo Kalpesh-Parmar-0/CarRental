@@ -13,8 +13,11 @@ const generateToken = (userId)=>{
 export const registerUser = async (req, res)=> {
     try {
         const {name, email, password} = req.body
-        if(!name || !email || !password || password.length < 8){
+        if(!name || !email || !password){
             return res.json({success: false, message: 'fill all the fields'})
+        }
+        if (password.length < 8) {
+            return res.json({ success: false, message: 'Password must be at least 8 characters long' })
         }
 
         const userExists = await User.findOne({email})
@@ -85,7 +88,7 @@ export const getUserData = async (req, res)=>{
 // get all cars for frontend
 export const getCars = async (req, res)=>{
     try {
-        const cars = await Car.find({isAvaliable: true})
+        const cars = await Car.find({isDeleted: false, isAvaliable: true})
         res.json({success:true, cars})
         
     } catch (error) {

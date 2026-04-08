@@ -1,6 +1,6 @@
 import express from 'express'
 import { protect } from '../middelware/auth.js';
-import { addCar, changeRoleToOwner, deleteCar, getDashbordData, getOwnerCars, toggleCarAvailability, updateUserImage } from '../controllers/ownerController.js';
+import { addCar, changeRoleToOwner, deleteCar, getDashbordData, getOwnerCars, toggleCarAvailability, updateProfile } from '../controllers/ownerController.js';
 import upload from '../middelware/multer.js'
 
 const ownerRouter = express.Router();
@@ -12,7 +12,7 @@ ownerRouter.post('/toggle-car', protect, toggleCarAvailability)
 ownerRouter.post('/delete-car', protect, deleteCar)
 
 ownerRouter.get('/dashboard', protect, getDashbordData)
-ownerRouter.post('/update-image', upload.single("image"),protect, updateUserImage)
+ownerRouter.post('/update-profile', upload.single("image"),protect, updateProfile)
 
 
 export default ownerRouter;

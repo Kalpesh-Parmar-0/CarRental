@@ -20,6 +20,10 @@ export const changeRoleToOwner = async (req, res) => {
 export const addCar = async (req, res) => {
     try {
         const {_id} = req.user;
+
+        if (req.user.role !== "owner"){
+            return res.json({success:false, message: "Unauthorized"})
+        }
         let car = JSON.parse(req.body.carData);
         const imageFile = req.file;
 
@@ -56,7 +60,11 @@ export const addCar = async (req, res) => {
 export const getOwnerCars = async (req, res) =>{
     try{
         const {_id} = req.user;
-        const cars = await Car.find({owner: _id})
+        const cars = await Car.find({owner: _id, isDeleted: false})
+
+        if (cars.length === 0){
+            return res.json({success:true, message: "No cars found", cars: []})
+        }
         res.json({success:true, cars})
     } catch (error){
         console.log(error.message)
@@ -70,6 +78,10 @@ export const toggleCarAvailability = async (req, res) => {
         const {_id} = req.user;
         const {carId} = req.body
         const car = await Car.findById(carId)
+
+        if(!car || car.isDeleted){
+            return res.json({success:false, message: "Car not found"})
+        }
 
         // checking if car belongs to the user
         if(car.owner.toString() !== _id.toString()){
@@ -93,12 +105,18 @@ export const deleteCar = async (req, res) => {
         const {carId} = req.body
         const car = await Car.findById(carId)
 
+        if(!car){
+            return res.json({success:false, message: "Car not found"})
+        }
         // checking if car belongs to the user
         if(car.owner.toString() !== _id.toString()){
             return res.json({success:false, message: "Unauthorized"})
         }
 
-        car.owner = null;
+        await Booking.updateMany({car: carId}, {status: "cancelled"})
+
+        // car.owner = null;
+        car.isDeleted = true;
         car.isAvaliable = false;
         await car.save()
 
@@ -116,14 +134,25 @@ export const getDashbordData = async (req, res) => {
         if(role !== 'owner') {
             return res.json({success:false, message: "Unauthorized"})
         }
-        const cars = await Car.find({ owner: _id })
+        const cars = await Car.find({ owner: _id, isDeleted: false})
         const bookings = await Booking.find({owner: _id}).populate('car').sort({createdAt: -1})
 
-        const pendingBookings = await Booking.find({owner: _id, status: "pending"})
-        const completedBookings = await Booking.find({owner: _id, status: "confirmed"})
+        // const pendingBookings = await Booking.find({owner: _id, status: "pending"})
+        const pendingBookings = bookings.filter(booking => booking.status === "pending")
+        // const completedBookings = await Booking.find({owner: _id, status: "confirmed"})
+        const completedBookings = bookings.filter(booking => booking.status === "confirmed")
 
         // calculate monthly revenue from booking that are confirmed
-        const monthlyRevenue = bookings.slice().filter(booking => booking.status === 'confirmed').reduce((acc, booking)=> acc + booking.price, 0)
+        const now = new Date();
+        const monthlyRevenue = bookings.filter(booking => {
+            const bookingDate = new Date(booking.createdAt);
+            return booking.status === 'confirmed' &&
+                bookingDate.getMonth() === now.getMonth() &&
+                bookingDate.getFullYear() === now.getFullYear();
+        }).reduce((acc, booking) => acc + booking.price, 0);
+
+        // calculate total revenue from booking that are confirmed
+        const totalRevenue = bookings.slice().filter(booking => booking.status === 'confirmed').reduce((acc, booking)=> acc + booking.price, 0)
 
         const dashbordData = {
             totalCars: cars.length,
@@ -131,7 +160,8 @@ export const getDashbordData = async (req, res) => {
             pendingBookings: pendingBookings.length,
             completedBookings: completedBookings.length,
             recentBookings: bookings.slice(0,3),
-            monthlyRevenue
+            monthlyRevenue,
+            totalRevenue
         }
 
         res.json({success:true, dashbordData})
@@ -143,35 +173,50 @@ export const getDashbordData = async (req, res) => {
 }
 
 // api to update user image
-export const updateUserImage = async(req, res) => {
+export const updateProfile = async(req, res) => {
     try {
         const {_id} = req.user;
-
+        const {name} = req.body;
         const imageFile = req.file;
 
-        // upload image to imagekit
-        const fileBuffer = fs.readFileSync(imageFile.path)
-        const response = await imagekit.upload({
-            file: fileBuffer,
-            fileName: imageFile.originalname, 
-            folder:'/users'
-        })
+        const user = await User.findById(_id);
 
-        // optimize through image url transformation
-        var optimizedImageUrl = imagekit.url({
-            path : response.filePath,
-            transformation : [
-                {width:'400'}, // width resize
-                {quality:'auto'}, // auto compression
-                {format: 'webp'} // convert to modern format
-            ]
-        });
+        if (!user){
+            return res.json({success:false, message: "User not found"})
+        }
 
-        const image = optimizedImageUrl;
-        await User.findByIdAndUpdate(_id, {image});
+        if (name){
+            user.name = name;
+        }
 
-        res.json({success: true, message: "Image updated"})
+        if (imageFile){
+            if (user.imageKitFileId){
+                await imagekit.deleteFile(user.imageKitFileId)
+            }
+            // upload image to imagekit
+            const fileBuffer = fs.readFileSync(imageFile.path)
+            const response = await imagekit.upload({
+                file: fileBuffer,
+                fileName: imageFile.originalname, 
+                folder:'/users'
+            })
 
+            // optimize through image url transformation
+            var optimizedImageUrl = imagekit.url({
+                path : response.filePath,
+                transformation : [
+                    {width:'400'}, // width resize
+                    {quality:'auto'}, // auto compression
+                    {format: 'webp'} // convert to modern format
+                ]
+            });
+
+            user.image = optimizedImageUrl;
+            user.imageKitFileId = response.fileId;
+        }
+
+        await user.save()
+        res.json({success: true, message: "Profile updated"})
         
     } catch (error) {
         console.log(error.message)
