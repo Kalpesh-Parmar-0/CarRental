@@ -5,7 +5,10 @@ const carSchema = new mongoose.Schema({
     owner:{type: ObjectId, ref: 'User'},
     brand: {type:String, required: true},
     model: {type: String, required: true},
-    image: {type: String, required: true},
+    images: [{
+        url: {type: String}, 
+        fileId:{type: String}
+    }],
     year: {type: Number, required: true},
     category: {type: String, required: true},
     seating_capacity: {type: Number, required: true},
