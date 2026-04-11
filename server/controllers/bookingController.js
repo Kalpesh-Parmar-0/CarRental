@@ -203,7 +203,7 @@ export const updateBooking = async (req, res) => {
         // use existing values if not provided
         const updatedPickupDate = pickupDate ? new Date(pickupDate) : booking.pickupDate;
         const updatedReturnDate = returnDate ? new Date(returnDate) : booking.returnDate;
-        const carToBook = newCarId || booking.car.toString();
+        // const carToBook = newCarId || booking.car.toString();
 
         // ✅ validate dates
         if (updatedPickupDate >= updatedReturnDate) {
@@ -222,11 +222,6 @@ export const updateBooking = async (req, res) => {
                 return res.json({success: false, message: "Selected car not found or unavailable"})
             }
 
-            // prevent booking own car
-            if (newCarData.owner.toString() === _id.toString()) {
-                return res.json({success: false, message: "You cannot book your own car"})
-            }
-
             // ✅ check new car availability for requested dates
             const newCarConflict = await Booking.findOne({
                 car: newCarId,
@@ -236,7 +231,11 @@ export const updateBooking = async (req, res) => {
                 returnDate: {$gte: updatedPickupDate}
             })
             if (newCarConflict) {
-                return res.json({success: false, message: "New car is not available for selected dates"})
+                // ✅ tell user which dates are conflicting
+                return res.json({
+                    success: false,
+                    message: `Car is already booked from ${newCarConflict.pickupDate.toDateString()} to ${newCarConflict.returnDate.toDateString()}`
+                })
             }
 
             // ✅ release old car — cancel old booking so old car is free for others
