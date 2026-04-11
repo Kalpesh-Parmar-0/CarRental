@@ -165,3 +165,141 @@ export const changeBookingStatus = async (req, res) => {
         res.json({success: false, message: error.message})
     }
 }
+
+// api to update booking for user
+export const updateBooking = async (req, res) => {
+    try {
+        const {_id} = req.user;
+        const {bookingId, pickupDate, returnDate, newCarId, cancel} = req.body;
+
+        // ✅ validate bookingId
+        if (!bookingId) {
+            return res.json({success: false, message: "Please provide bookingId"})
+        }
+
+        // ✅ check booking exists
+        const booking = await Booking.findById(bookingId)
+        if (!booking) {
+            return res.json({success: false, message: "Booking not found"})
+        }
+
+        // ✅ check booking belongs to user
+        if (booking.user.toString() !== _id.toString()) {
+            return res.json({success: false, message: "Unauthorized"})
+        }
+
+        // ✅ cannot update cancelled booking only
+        if (booking.status === 'cancelled') {
+            return res.json({success: false, message: "Cannot update cancelled booking"})
+        }
+
+        // ✅ handle cancel request
+        if (cancel) {
+            booking.status = 'cancelled'
+            await booking.save()
+            return res.json({success: true, message: "Booking cancelled successfully"})
+        }
+
+        // use existing values if not provided
+        const updatedPickupDate = pickupDate ? new Date(pickupDate) : booking.pickupDate;
+        const updatedReturnDate = returnDate ? new Date(returnDate) : booking.returnDate;
+        const carToBook = newCarId || booking.car.toString();
+
+        // ✅ validate dates
+        if (updatedPickupDate >= updatedReturnDate) {
+            return res.json({success: false, message: "Return date must be after pickup date"})
+        }
+        if (updatedPickupDate < new Date()) {
+            return res.json({success: false, message: "Pickup date cannot be in the past"})
+        }
+
+        // ✅ handle car change
+        if (newCarId) {
+
+            // validate new car exists
+            const newCarData = await Car.findById(newCarId)
+            if (!newCarData || newCarData.isDeleted || !newCarData.isAvaliable) {
+                return res.json({success: false, message: "Selected car not found or unavailable"})
+            }
+
+            // prevent booking own car
+            if (newCarData.owner.toString() === _id.toString()) {
+                return res.json({success: false, message: "You cannot book your own car"})
+            }
+
+            // ✅ check new car availability for requested dates
+            const newCarConflict = await Booking.findOne({
+                car: newCarId,
+                _id: {$ne: bookingId},            // exclude current booking
+                status: {$nin: ['cancelled']},
+                pickupDate: {$lte: updatedReturnDate},
+                returnDate: {$gte: updatedPickupDate}
+            })
+            if (newCarConflict) {
+                return res.json({success: false, message: "New car is not available for selected dates"})
+            }
+
+            // ✅ release old car — cancel old booking so old car is free for others
+            booking.status = 'cancelled'
+            await booking.save()
+
+            // ✅ recalculate price for new car
+            const noOfDays = Math.ceil((updatedReturnDate - updatedPickupDate) / (1000 * 60 * 60 * 24))
+            const price = newCarData.pricePerDay * noOfDays;
+
+            // ✅ create fresh booking for new car
+            const newBooking = await Booking.create({
+                car: newCarId,
+                owner: newCarData.owner,
+                user: _id,
+                pickupDate: updatedPickupDate,
+                returnDate: updatedReturnDate,
+                price,
+                status: 'pending'  // reset to pending for new car
+            })
+
+            return res.json({success: true, message: "Car changed and booking updated", booking: newBooking})
+        }
+
+        // ✅ same car — check date conflicts excluding current booking
+        if (pickupDate || returnDate) {
+            const conflict = await Booking.findOne({
+                car: booking.car,
+                _id: {$ne: bookingId},            // ✅ exclude current booking
+                status: {$nin: ['cancelled']},
+                pickupDate: {$lte: updatedReturnDate},
+                returnDate: {$gte: updatedPickupDate}
+            })
+
+            if (conflict) {
+                // ✅ tell user which dates are conflicting
+                return res.json({
+                    success: false,
+                    message: `Car is already booked from ${conflict.pickupDate.toDateString()} to ${conflict.returnDate.toDateString()}`
+                })
+            }
+        }
+
+        // ✅ get car data for price recalculation
+        const carData = await Car.findById(booking.car)
+        if (!carData) {
+            return res.json({success: false, message: "Car not found"})
+        }
+
+        // ✅ recalculate price based on updated dates
+        const noOfDays = Math.ceil((updatedReturnDate - updatedPickupDate) / (1000 * 60 * 60 * 24))
+        const price = carData.pricePerDay * noOfDays;
+
+        // ✅ update booking
+        booking.pickupDate = updatedPickupDate;
+        booking.returnDate = updatedReturnDate;
+        booking.price = price;
+        await booking.save()
+
+        res.json({success: true, message: "Booking updated", booking})
+
+    } catch (error) {
+        console.log(error.message)
+        res.json({success: false, message: error.message})
+    }
+}
