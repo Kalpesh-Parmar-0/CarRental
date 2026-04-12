@@ -49,9 +49,9 @@ export const AppProvider = ({children})=>{
     }
 
     // function to logout user
-    const logout = ()=>{
+    const logout = async ()=>{
         try{
-            const {data} = axios.post('/api/user/logout')
+            const {data} = await axios.post('/api/user/logout')
             if (data.success) {
                 setUser(null)
                 setIsOwner(false)
@@ -71,8 +71,7 @@ export const AppProvider = ({children})=>{
 
     const value = {
         navigate, currency,axios, 
-        user, setUser, 
-        token, setToken, 
+        user, setUser,
         isOwner, setIsOwner, 
         fetchUser, fetchCars,
         showLogin, setShowLogin, 

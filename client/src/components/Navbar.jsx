@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {assets, menuLinks} from '../assets/assets'
 import {Link, useLocation, useNavigate} from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
@@ -11,6 +11,8 @@ const Navbar = () => {
 
     const location = useLocation()
     const [open, setOpen] = useState(false)
+    const [showDropdown, setShowDropdown] = useState(false) // ✅ avatar dropdown
+    const dropdownRef = useRef(null) // ✅ ref for dropdown to detect outside clicks
     const navigate = useNavigate()
 
     const changeRole = async ()=>{
@@ -26,6 +28,17 @@ const Navbar = () => {
             toast.error(error.message)
         }
     }
+
+    // ✅ close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setShowDropdown(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
 
   return (
     <motion.div
@@ -52,8 +65,62 @@ const Navbar = () => {
             <div className='flex max-sm:flex-col items-start sm:items-center gap-6'>
                 <button onClick={()=> isOwner ? navigate('/owner') : changeRole()} className='cursor-pointer'>{isOwner ?  'Dashboard' : 'List Cars'}</button>
 
-                <button onClick={()=> {user ? logout() : setShowLogin(true)}} className='cursor-pointer px-8 py-2 bg-primary hover:bg-primary-dull transition-all text-white rounded-lg'>{user ? 'Logout' :  'Login'}</button>
+                {/* <button onClick={()=> {user ? logout() : setShowLogin(true)}} className='cursor-pointer px-8 py-2 bg-primary hover:bg-primary-dull transition-all text-white rounded-lg'>{user ? 'Logout' :  'Login'}</button> */}
+                
+                {user ? (
+                    // ✅ avatar with dropdown when logged in
+                    <div className='relative' ref={dropdownRef}>
+                        <button
+                            onClick={() => setShowDropdown(!showDropdown)}
+                            className='cursor-pointer flex items-center gap-2'>
+
+                            {/* ✅ show image if uploaded, else show first letter */}
+                            {user.image ? (
+                                <img
+                                    src={user.image}
+                                    alt={user.name}
+                                    className='w-9 h-9 rounded-full object-cover border-2 border-primary'
+                                />
+                            ) : (
+                                <div className='w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-sm border-2 border-primary'>
+                                    {user.name.charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            <span className='hidden sm:block text-sm font-medium'>
+                                {user.name.split(' ')[0]} {/* ✅ show first name only */}
+                            </span>
+                        </button>
+
+                        {/* ✅ dropdown menu */}
+                        {showDropdown && (
+                            <div className='absolute right-0 top-12 bg-white border border-borderColor rounded-lg shadow-lg py-2 w-40 z-50'>
+                                <button
+                                    onClick={() => { navigate('/profile'); setShowDropdown(false) }}
+                                    className='w-full text-left px-4 py-2 hover:bg-gray-50 text-sm'>
+                                    My Profile
+                                </button>
+                                <button
+                                    onClick={() => { navigate('/my-bookings'); setShowDropdown(false) }}
+                                    className='w-full text-left px-4 py-2 hover:bg-gray-50 text-sm'>
+                                    My Bookings
+                                </button>
+                                <hr className='my-1 border-borderColor' />
+                                <button
+                                    onClick={() => { logout(); setShowDropdown(false) }}
+                                    className='w-full text-left px-4 py-2 hover:bg-gray-50 text-sm text-red-500'>
+                                    Logout
+                                </button>
             </div>
+                        )} 
+        </div> ) : (
+            // ✅ show login button when not logged in
+                    <button
+                        onClick={() => setShowLogin(true)}
+                        className='cursor-pointer px-8 py-2 bg-primary hover:bg-primary-dull transition-all text-white rounded-lg'>
+                        Login
+                    </button>
+        )}
+        </div>
         </div>
         
         <button className='sm:hidden cursor-pointer' aria-label='Menu' onClick={()=> setOpen(!open)}>

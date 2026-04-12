@@ -119,14 +119,14 @@ const switchState = (newState) => {
             {state === "register" ? (
                 <p>
                     Already have account?{" "}
-                    <span onClick={() => setState("login")} className="text-primary cursor-pointer">
+                    <span onClick={() => switchState("login")} className="text-primary cursor-pointer">
                         click here
                     </span>
                 </p>
             ) : (
                 <p>
                     Create an account?{" "} 
-                    <span onClick={() => setState("register")} className="text-primary cursor-pointer">
+                    <span onClick={() => switchState("register")} className="text-primary cursor-pointer">
                         click here
                     </span>
                 </p>
