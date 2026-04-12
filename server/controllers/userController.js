@@ -74,6 +74,11 @@ export const loginUser = async(req, res)=>{
     }
 }
 
+export const logoutUser = (req, res) => {
+    res.clearCookie("token")
+    res.json({ success: true, message: "Logged out successfully" })
+}
+
 // get user data using token(jwt)
 export const getUserData = async (req, res)=>{
     try {

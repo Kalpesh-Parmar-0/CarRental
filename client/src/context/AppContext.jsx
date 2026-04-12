@@ -4,21 +4,21 @@ import {toast} from 'react-hot-toast'
 import { useNavigate } from "react-router-dom";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL
+// ✅ send cookies with every request automatically
+axios.defaults.withCredentials = true
 
 export const AppContext = createContext();
 
 export const AppProvider = ({children})=>{
-
     const navigate = useNavigate()
     const currency = import.meta.env.VITE_CURRENCY
 
-    const [token, setToken] = useState(null)
+    // const [token, setToken] = useState(null)
     const [user, setUser] = useState(null)
     const [isOwner, setIsOwner] = useState(false)
-    const [showLogin, setShowLogin] = useState(null)
+    const [showLogin, setShowLogin] = useState(false)
     const [pickupDate, setPickupDate] =useState('')
     const [returnDate, setReturnDate] = useState('')
-    
     const [cars, setCars] = useState([])
 
     // function to check if user has logged in 
@@ -29,7 +29,9 @@ export const AppProvider = ({children})=>{
                 setUser(data.user)
                 setIsOwner(data.user.role === 'owner')
             } else {
-                navigate('/')
+                // ✅ don't navigate — user might just not be logged in yet
+                setUser(null)
+                setIsOwner(false)
             }
         } catch (error) {
             toast.error(error.message)
@@ -48,31 +50,35 @@ export const AppProvider = ({children})=>{
 
     // function to logout user
     const logout = ()=>{
-        localStorage.removeItem('token')
-        setToken(null)
-        setUser(null)
-        setIsOwner(false)
-        axios.defaults.headers.common['Authorization'] = ''
-        toast.success('You have been logged out')
+        try{
+            const {data} = axios.post('/api/user/logout')
+            if (data.success) {
+                setUser(null)
+                setIsOwner(false)
+                toast.success('Logged out successfully')
+                navigate('/')
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     // useEffect to retrieve the token from local storage
     useEffect(()=>{
-        const token = localStorage.getItem('token')
-        setToken(token)
+        fetchUser()
         fetchCars()
     }, [])
 
-    // useEffect to fetch user data when token is available
-    useEffect(()=>{
-        if(token){
-            axios.defaults.headers.common['Authorization'] = `${token}`
-            fetchUser()
-        }
-    }, [token])
-
     const value = {
-        navigate, currency, axios, user, setUser, token, setToken, isOwner, setIsOwner, fetchUser, showLogin, setShowLogin, logout, fetchCars, cars, setCars, pickupDate, setPickupDate, returnDate, setReturnDate
+        navigate, currency,axios, 
+        user, setUser, 
+        token, setToken, 
+        isOwner, setIsOwner, 
+        fetchUser, fetchCars,
+        showLogin, setShowLogin, 
+        logout, cars, setCars, 
+        pickupDate, setPickupDate, 
+        returnDate, setReturnDate
     }
 
     return (<AppContext.Provider value={value}>
