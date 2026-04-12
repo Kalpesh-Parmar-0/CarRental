@@ -1,5 +1,5 @@
 import React, { useState, useRef, use } from 'react'
-import { assets, cityList } from '../assets/assets'
+import { assets} from '../assets/assets'
 import { useAppContext } from '../context/AppContext'
 import {motion} from 'motion/react'
 
@@ -10,7 +10,7 @@ const Hero = () => {
     const [showSuggestions, setShowSuggestions] = useState(false) // ✅ toggle list
     const isSelectingRef = useRef(false) // ✅ track if user is clicking suggestion
 
-    const {pickupDate, setPickupDate, returnDate, setReturnDate, navigate} = useAppContext()
+    const {pickupDate, setPickupDate, returnDate, setReturnDate, navigate, cities} = useAppContext()
 
     // ✅ filter cities based on input
     const handleLocationChange = (e) => {
@@ -23,7 +23,7 @@ const Hero = () => {
             return
         }
 
-        const filtered = cityList.filter(city =>
+        const filtered = cities.filter(city =>
             city.toLowerCase().includes(value.toLowerCase())
         )
         setSuggestions(filtered)
@@ -48,7 +48,7 @@ const Hero = () => {
       e.preventDefault()
 
       // ✅ validate location is from city list
-        if (!cityList.includes(pickupLocation)) {
+        if (!cities.includes(pickupLocation)) {
             return toast.error("Please select a valid city from suggestions")
         }
 

@@ -101,3 +101,18 @@ export const getCars = async (req, res)=>{
         res.json({success:false, message:error.message})
     }
 }
+
+// get all cities
+export const getCities = async (req, res)=> {
+    try {
+        // ✅ get all unique locations from cars that are active
+        const cities = await Car.distinct('location', {
+            isDeleted: false,
+            isAvaliable: true
+        })
+        res.json({success: true, cities})
+    } catch (error) {
+        console.log(error.message)
+        res.json({success: false, message: error.message})
+    }
+}

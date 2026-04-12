@@ -1,5 +1,5 @@
 import express from 'express'
-import {registerUser, loginUser, logoutUser, getUserData, getCars} from '../controllers/userController.js';
+import {registerUser, loginUser, logoutUser, getUserData, getCars, getCities} from '../controllers/userController.js';
 import { protect } from '../middelware/auth.js';
 
 const userRouter = express.Router();
@@ -9,6 +9,6 @@ userRouter.post('/login', loginUser)
 userRouter.post('/logout', logoutUser)
 userRouter.get('/data', protect, getUserData)
 userRouter.get('/cars', getCars)
-
+userRouter.get('/cities', getCities)
 
 export default userRouter;

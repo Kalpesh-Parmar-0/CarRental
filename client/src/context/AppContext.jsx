@@ -20,6 +20,7 @@ export const AppProvider = ({children})=>{
     const [pickupDate, setPickupDate] =useState('')
     const [returnDate, setReturnDate] = useState('')
     const [cars, setCars] = useState([])
+    const [cities, setCities] = useState([])
 
     // function to check if user has logged in 
     const fetchUser = async ()=>{
@@ -48,6 +49,15 @@ export const AppProvider = ({children})=>{
         }
     }
 
+    const fetchCities = async ()=> {
+        try {
+            const {data} = await axios.get('/api/user/cities')
+            data.success ? setCities(data.cities) : toast.error(data.message)
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
     // function to logout user
     const logout = async ()=>{
         try{
@@ -67,6 +77,7 @@ export const AppProvider = ({children})=>{
     useEffect(()=>{
         fetchUser()
         fetchCars()
+        fetchCities()
     }, [])
 
     const value = {
@@ -77,7 +88,8 @@ export const AppProvider = ({children})=>{
         showLogin, setShowLogin, 
         logout, cars, setCars, 
         pickupDate, setPickupDate, 
-        returnDate, setReturnDate
+        returnDate, setReturnDate,
+        cities, setCities
     }
 
     return (<AppContext.Provider value={value}>
