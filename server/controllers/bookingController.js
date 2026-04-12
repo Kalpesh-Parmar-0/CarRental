@@ -75,9 +75,20 @@ export const createBooking = async (req, res) => {
             return res.json({ success: false, message: "Car not found or unavailable" })
         }
 
-        const isAvailable = await checkAvailability(car, pickupDate, returnDate)
-        if(!isAvailable){
-            return res.json({success: false, message: "Car is not available"})
+        // ✅ find conflicting booking instead of just true/false
+        const conflict = await Booking.findOne({
+            car,
+            status: { $nin: ['cancelled'] },
+            pickupDate: { $lte: new Date(returnDate) },
+            returnDate: { $gte: new Date(pickupDate) }
+        })
+
+        // ✅ return conflict dates in response
+        if (conflict) {
+            return res.json({
+                success: false,
+                message: `Car is already booked from ${conflict.pickupDate.toDateString()} to ${conflict.returnDate.toDateString()}`
+            })
         }
 
         // calculate price base on pickup and return date

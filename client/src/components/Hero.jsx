@@ -1,4 +1,4 @@
-import React, { useState, useRef, use } from 'react'
+import React, { useState, useRef } from 'react'
 import { assets} from '../assets/assets'
 import { useAppContext } from '../context/AppContext'
 import {motion} from 'motion/react'
