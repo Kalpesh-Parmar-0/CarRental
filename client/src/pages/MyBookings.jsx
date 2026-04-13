@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "motion/react";
 
 const MyBookings = () => {
-  const { axios, user, currency, cars } = useAppContext();
+  const { axios, user, currency, cars, navigate } = useAppContext();
 
   const [bookings, setBookings] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -14,6 +14,7 @@ const MyBookings = () => {
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // ✅ car selector states
   const [showCarSelector, setShowCarSelector] = useState(false);
@@ -24,6 +25,7 @@ const MyBookings = () => {
 
   const fetchMyBookings = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.get("/api/bookings/user");
       if (data.success) {
         setBookings(data.bookings);
@@ -32,6 +34,8 @@ const MyBookings = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,7 +163,37 @@ const MyBookings = () => {
       />
 
       <div>
-        {bookings.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-5 mt-12">
+            {/* ✅ skeleton cards while loading */}
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 border border-borderColor rounded-lg animate-pulse"
+              >
+                {/* image skeleton */}
+                <div className="md:col-span-1">
+                  <div className="w-full aspect-video bg-gray-200 rounded-md mb-3" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                </div>
+                {/* info skeleton */}
+                <div className="md:col-span-2 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-2/5" />
+                  <div className="h-10 bg-gray-200 rounded w-2/3" />
+                </div>
+                {/* price skeleton */}
+                <div className="md:col-span-1 space-y-2 flex flex-col items-end">
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  <div className="h-8 bg-gray-200 rounded w-2/3" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : bookings.length === 0 ? (
           <p className="text-gray-500 mt-12 text-center">No bookings found</p>
         ) : (
           bookings.map((booking, index) => (
@@ -172,19 +206,24 @@ const MyBookings = () => {
             >
               {/* car image and info */}
               <div className="md:col-span-1">
-                <div className="rounded-md overflow-hidden mb-3">
+                <div
+                  onClick={() => navigate(`/car-details/${booking.car._id}`)}
+                  className="rounded-md overflow-hidden mb-3 cursor-pointer hover:opacity-80 transition-opacity"
+                >
                   <img
                     src={booking.car.images?.[0]?.url || booking.car.image}
                     className="w-full h-auto aspect-video object-cover"
                     alt=""
                   />
                 </div>
-                <p className="text-lg font-medium mt-2">
+                <p
+                  onClick={() => navigate(`/car-details/${booking.car._id}`)}
+                  className="text-lg font-medium mt-2 cursor-pointer hover:text-primary transition-colors"
+                >
                   {booking.car.brand} {booking.car.model}
                 </p>
                 <p className="text-gray-500">
-                  {booking.car.year} | {booking.car.category} |{" "}
-                  {booking.car.location}
+                  {booking.car.year} | {booking.car.category}
                 </p>
               </div>
 
@@ -255,6 +294,33 @@ const MyBookings = () => {
                     {booking.price}
                   </h1>
                   <p>Booked on {booking.createdAt.split("T")[0]}</p>
+
+                  {booking.car.owner && (
+                    <div className="flex text-left items-center gap-3 mt-4 p-3 bg-light rounded-lg">
+                      <div>
+                        <p className="text-gray-500 text-md">Car Owner</p>
+                        <p className="font-medium text-gray-800">
+                          {booking.car.owner.name}
+                        </p>
+                        <p className="text-gray-500">
+                          {booking.car.owner.email}
+                        </p>
+                      </div>
+
+                      {/* owner image or first letter */}
+                      {booking.car.owner.image ? (
+                        <img
+                          src={booking.car.owner.image}
+                          alt={booking.car.owner.name}
+                          className="w-9 h-9 rounded-full object-cover border border-gray-200 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-sm shrink-0">
+                          {booking.car.owner.name?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>

@@ -193,18 +193,19 @@ const CarDetails = () => {
 
               {/* car owner info */}
               {car.owner && (
-                <div className='flex items-center gap-3 mt-3'>
+                <div className='flex items-center gap-3 mt-4 p-3 bg-light rounded-lg'>
                   <div>
-                      <p className='text-gray-500 text-sm'>Listed by <span className='text-gray-800 font-medium'>{car.owner.name}</span></p>
-                      <p className='text-gray-500 text-sm'>Email: <span className='text-gray-800 font-medium'>{car.owner.email}</span></p>
+                      <p className='text-gray-500 text-md'>Car Owner</p>
+                      <p className='font-medium text-gray-800'>{car.owner.name}</p>
+                      <p className='text-gray-500 text-sm'>{car.owner.email}</p>
                     </div>
                   {/* show owner image or first later */}
                   {car.owner.image ? (
                     <img src= {car.owner.image} alt={car.owner.name}
-                    className= 'w-8 h-8 rounded-full border border-gray-200'
+                    className= 'w-9 h-9 rounded-full object-cover border border-gray-200 shrink-0'
                     />
                     ) : (
-                      <div className='w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold'>
+                      <div className='w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold shrink-0'>
                         {car.owner.name.charAt(0).toUpperCase()}
                       </div>
                   )}
