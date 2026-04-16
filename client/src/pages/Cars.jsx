@@ -30,7 +30,14 @@ const Cars = () => {
       return car.brand.toLowerCase().includes(input.toLowerCase()) || 
       car.model.toLowerCase().includes(input.toLowerCase()) ||
       car.category.toLowerCase().includes(input.toLowerCase()) ||
-      car.transmission.toLowerCase().includes(input.toLowerCase())
+      car.transmission.toLowerCase().includes(input.toLowerCase()) ||
+      car.fuel_type.toLowerCase().includes(input.toLowerCase()) ||
+      car.features.some(feature => feature.toLowerCase().includes(input.toLowerCase())) ||
+      car.year.toString().includes(input) ||
+      car.pricePerDay.toString().includes(input) ||
+      car.location.toLowerCase().includes(input.toLowerCase()) ||
+      car.seating_capacity.toString().includes(input) ||
+      car.owner.name.toLowerCase().includes(input.toLowerCase())
     })
     setFilteredCars(filtered)
   }
