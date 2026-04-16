@@ -26,6 +26,24 @@ const CarCard = ({car}) => {
                     <h3 className='text-lg font-medium'>{car.brand} {car.model}</h3>
                     <p className='text-muted-foreground text-sm'>{car.category} | {car.year}</p>
                 </div>
+                {/* car owner info */}
+                {car.owner && (
+                    <div className='flex items-center gap-3 p-3 bg-light rounded-lg'>
+                    <div>
+                        <p className='font-medium text-gray-800'>{car.owner.name}</p>
+                        </div>
+                    {/* show owner image or first later */}
+                    {car.owner.image ? (
+                        <img src= {car.owner.image} alt={car.owner.name}
+                        className= 'w-9 h-9 rounded-full object-cover border border-gray-200 shrink-0'
+                        />
+                        ) : (
+                        <div className='w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold shrink-0'>
+                            {car.owner.name.charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                    </div>
+                )}
             </div>
             <div className='mt-4 grid grid-cols-2 gap-y-2 text-gray-600'>
                 <div className='flex items-center text-sm text-muted-foreground'>
