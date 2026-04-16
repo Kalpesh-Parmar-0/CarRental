@@ -2,9 +2,29 @@ import React, { use } from 'react'
 import { assets } from '../assets/assets'
 import {motion} from 'motion/react'
 import { useAppContext } from '../context/AppContext'
+import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 
 const Banner = () => {
-  const {isOwner} = useAppContext()
+  const {isOwner, fetchUser, setIsOwner, axios} = useAppContext()
+  const navigate = useNavigate()
+
+  const changeRole = async ()=>{
+        try {
+            const {data} = await axios.post('/api/owner/change-role')
+            if(data.success) {
+                await fetchUser()
+                setIsOwner(true)
+                toast.success(data.message)
+                navigate('/owner/add-car')
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
   return (
     <motion.div
     initial = {{opacity: 0, y: 50}}
@@ -21,6 +41,7 @@ const Banner = () => {
             <motion.button
             whileHover={{scale: 1.05}}
             whileTap={{scale: 0.95}}
+            onClick={()=> navigate('/owner/add-car')}
             className='px-6 py-2 bg-white hover:bg-slate-100 transition-all text-primary rounded-lg text-sm mt-4 cursor-pointer'>List your car</motion.button>
         </div>
         ) : (
@@ -32,6 +53,7 @@ const Banner = () => {
             <motion.button
             whileHover={{scale: 1.05}}
             whileTap={{scale: 0.95}}
+            onClick={()=> changeRole()}
             className='px-6 py-2 bg-white hover:bg-slate-100 transition-all text-primary rounded-lg text-sm mt-4 cursor-pointer'>List your car</motion.button>
         </div>
         )}

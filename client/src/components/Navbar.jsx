@@ -7,7 +7,7 @@ import {motion} from 'motion/react'
 
 const Navbar = () => {
 
-    const {setShowLogin, user, logout, isOwner, axios, setIsOwner} = useAppContext()
+    const {setShowLogin, user, logout, isOwner, axios, setIsOwner, fetchUser} = useAppContext()
 
     const location = useLocation()
     const [open, setOpen] = useState(false)
@@ -19,8 +19,10 @@ const Navbar = () => {
         try {
             const {data} = await axios.post('/api/owner/change-role')
             if(data.success) {
+                await fetchUser()
                 setIsOwner(true)
                 toast.success(data.message)
+                navigate('/owner/add-car')
             } else {
                 toast.error(data.message)
             }
@@ -57,10 +59,10 @@ const Navbar = () => {
                 </Link>
             ))}
 
-            <div className='hidden lg:flex items-center text-sm gap-2 border border-borderColor px-3 rounded-full max-w-56'>
+            {/* <div className='hidden lg:flex items-center text-sm gap-2 border border-borderColor px-3 rounded-full max-w-56'>
                 <input type="text" className="py-1.5 w-full bg-transparent outline-none placeholder-gray-500" placeholder='Search Products' />
                 <img src={assets.search_icon} alt="search" />
-            </div>
+            </div> */}
 
             <div className='flex max-sm:flex-col items-start sm:items-center gap-6'>
                 <button onClick={()=> isOwner ? navigate('/owner') : changeRole()} className='cursor-pointer'>{isOwner ?  'Dashboard' : 'List Cars'}</button>
