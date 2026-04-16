@@ -296,7 +296,9 @@ const MyBookings = () => {
                   <p>Booked on {booking.createdAt.split("T")[0]}</p>
 
                   {booking.car.owner && (
-                    <div className="flex text-left items-center gap-3 mt-4 p-3 bg-light rounded-lg">
+                    <div 
+                    onClick={()=> navigate(`/cars?owner=${booking.car.owner._id}`)}
+                    className="flex text-left items-center gap-3 mt-4 p-3 bg-light rounded-lg cursor-pointer hover:bg-gray-200 transition-all">
                       <div>
                         <p className="text-gray-500 text-md">Car Owner</p>
                         <p className="font-medium text-gray-800">

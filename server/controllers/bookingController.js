@@ -28,7 +28,7 @@ export const checkAvailabilityOfCar = async (req, res) => {
 
 
         // fetch all available car for given location
-        const cars = await Car.find({ location, isAvaliable: true, isDeleted: false })
+        const cars = await Car.find({ location, isAvaliable: true, isDeleted: false }).populate("owner", "name email image")
 
         if (cars.length === 0) {
             return res.json({ success: true, availableCars: [], message: "No cars found for this location" })
