@@ -4,7 +4,8 @@ A full-stack **MERN** (MongoDB, Express, React, Node.js) car rental web applicat
 
 **[📂 Source Code](https://github.com/Kalpesh-Parmar-0/CarRental)**
 
-![Home Page](./screenshots/home.png)
+## Preview
+https://github.com/user-attachments/assets/ea844995-0dc4-4f16-bc0b-fc7395a801bb
 
 ## ✨ Features
 
@@ -109,7 +110,7 @@ CarRental/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/<your-username>/CarRental.git
+git clone https://github.com/Kalpesh-Parmar-0/CarRental.git
 cd CarRental
 ```
 
@@ -163,4 +164,4 @@ The app will be available at `http://localhost:5173`, with the API running at `h
 
 ## 👤 Author
 
-Built by **Kalpesh Parmar** — [LinkedIn](www.linkedin.com/in/kalpesh-parmar-797b04245) · [GitHub](https://github.com/Kalpesh-Parmar-0)
+Built by **Kalpesh Parmar** — [LinkedIn](https://www.linkedin.com/in/kalpesh-parmar-797b04245) · [GitHub](https://github.com/Kalpesh-Parmar-0)
