@@ -19,7 +19,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://car-rental-flax-zeta.vercel.app/",
+      "https://car-rental-flax-zeta.vercel.app",
     ],
     credentials: true,
   }),
