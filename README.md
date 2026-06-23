@@ -2,9 +2,10 @@
 
 A full-stack **MERN** (MongoDB, Express, React, Node.js) car rental web application where users can browse and book cars, and car owners can list, manage, and track their fleet through a dedicated dashboard.
 
-**[📂 Source Code](https://github.com/Kalpesh-Parmar-0/CarRental)**
+**[🔗 Live Demo](https://car-rental-flax-zeta.vercel.app)** &nbsp;|&nbsp; **[📂 Source Code](https://github.com/Kalpesh-Parmar-0/CarRental)**
 
 ## Preview
+
 https://github.com/user-attachments/assets/ea844995-0dc4-4f16-bc0b-fc7395a801bb
 
 ## ✨ Features
